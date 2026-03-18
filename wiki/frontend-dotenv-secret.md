@@ -18,7 +18,7 @@ Docs:
 Default values: [`frontend/.env.example`](../frontend/.env.example)
 
 > [!NOTE]
-> It was added to [`.gitignore`](./git.md#gitignore) because you may specify there
+> The file `frontend/.env.secret` was added to [`.gitignore`](./git.md#gitignore) because you may specify there
 > [secrets](./environments.md#secrets) such as the [address of your VM](./vm.md#your-vm-ip-address).
 
 ## `VITE_API_TARGET`
