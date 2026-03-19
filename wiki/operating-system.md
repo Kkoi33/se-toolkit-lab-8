@@ -126,6 +126,8 @@ A username is the unique name that identifies a [user](#user) account on the ope
 
 The [username](#username) (without `<` and `>`).
 
+Replace this placeholder with `admin`.
+
 ## Group
 
 A group is a collection of [users](#user) that share the same [access permissions](#permission) to [files](./file-system.md#file) and [directories](./file-system.md#directory).

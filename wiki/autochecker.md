@@ -46,7 +46,7 @@ An agent that can check the setup on [your VM](./vm.md#your-vm) and send request
 ### Provide the `Autochecker` agent with access to the VM (REMOTE)
 
 > [!NOTE]
-> Replace [`<user>`](./operating-system.md#user-placeholder) with the actual [username](./operating-system.md#username).
+> Replace the placeholder [`<user>`](./operating-system.md#user-placeholder).
 
 > Add the [`SSH` public key](./ssh.md#ssh-public-key) for [the `Autochecker` agent](#the-autochecker-agent) so that it can access the VM as the user `<user>`.
 

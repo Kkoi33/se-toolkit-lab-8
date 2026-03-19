@@ -51,7 +51,7 @@ This reduces the attack surface of the VM: even if an attacker knows the IP addr
 ## Set up the `SSH` access to the VM
 
 > [!NOTE]
-> Replace [`<user>`](./operating-system.md#user-placeholder) with the actual [username](./operating-system.md#username).
+> Replace the placeholder [`<user>`](./operating-system.md#user-placeholder).
 
 Complete these steps:
 
@@ -283,7 +283,7 @@ Complete these steps:
 ### Create the non-root user `<user>` (REMOTE)
 
 > [!NOTE]
-> Replace [`<user>`](./operating-system.md#user-placeholder) with the actual [username](./operating-system.md#username).
+> Replace the placeholder [`<user>`](./operating-system.md#user-placeholder).
 
 Complete these steps:
 
@@ -404,7 +404,7 @@ Complete these steps:
 ### Set up the `SSH` key authentication for the user `<user>` (REMOTE)
 
 > [!NOTE]
-> Replace [`<user>`](./operating-system.md#user-placeholder) with the actual [username](./operating-system.md#username).
+> Replace the placeholder [`<user>`](./operating-system.md#user-placeholder).
 
 1. To create the `.ssh/` directory for the [user](./operating-system.md#user) `<user>`,
 
@@ -471,7 +471,7 @@ Complete these steps:
 ### Update the `SSH` config to connect to the VM as the user `<user>` (LOCAL)
 
 > [!NOTE]
-> Replace [`<user>`](./operating-system.md#user-placeholder) with the actual [username](./operating-system.md#username).
+> Replace the placeholder [`<user>`](./operating-system.md#user-placeholder).
 
 1. [Open the file](./vs-code.md#open-the-file-or-the-directory-using-code):
    `~/.ssh/config`.
@@ -504,7 +504,7 @@ Complete these steps:
 ### Connect to the VM as the user `<user>` (LOCAL)
 
 > [!NOTE]
-> Replace [`<user>`](./operating-system.md#user-placeholder) with the actual [username](./operating-system.md#username).
+> Replace the placeholder [`<user>`](./operating-system.md#user-placeholder).
 
 1. [Connect to the correct network](./vm.md#connect-to-the-correct-network).
 
