@@ -1,14 +1,19 @@
 # Lab 8 — Task 1 Report
 
 **Student:** [Your Name]
-**Date:** March 31, 2026
-**Lab:** Lab 8 — Build a Client with an AI Coding Agent
+**Date:** April 1, 2026
+**Lab:** Lab 8 — The Agent is the Interface
 
 ---
 
 ## Task 1A — Bare Agent
 
 ### Checkpoint 1: "What is the agentic loop?"
+
+**Command:**
+```bash
+cd nanobot && uv run nanobot agent -c ./config.json -m "What is the agentic loop?"
+```
 
 **Response:**
 
@@ -20,33 +25,71 @@ The agentic loop is the fundamental cycle that autonomous AI agents follow to ac
 Perceive → Reason → Act → Observe → (repeat)
 ```
 
-1. **Perceive** — The agent gathers information about its environment (reads user input, observes tool outputs, checks file systems, APIs, or other data sources)
+1. **Perceive** — The agent gathers information about its environment:
+   - Reads user input
+   - Observes tool outputs
+   - Checks file systems, APIs, or other data sources
 
-2. **Reason** — The agent processes information and plans (analyzes the current state, determines what needs to be done, decides which action to take next, may break complex goals into sub-tasks)
+2. **Reason** — The agent processes information and plans:
+   - Analyzes the current state
+   - Determines what needs to be done
+   - Decides which action to take next
+   - May break complex goals into sub-tasks
 
-3. **Act** — The agent executes actions using available tools (calls functions, sends messages, modifies state)
+3. **Act** — The agent executes actions using available tools:
+   - Calls functions (file operations, web searches, etc.)
+   - Sends messages
+   - Modifies state
 
-4. **Observe** — The agent receives feedback (tool outputs and return values, error messages, changes in the environment)
+4. **Observe** — The agent receives feedback:
+   - Tool outputs and return values
+   - Error messages
+   - Changes in the environment
 
 Then the loop repeats until the goal is achieved or the agent determines it cannot proceed.
 
 **Why It Matters:**
 
+This loop enables:
 - **Autonomy:** Agents can work without constant human guidance
 - **Adaptability:** Agents adjust based on observed outcomes
 - **Multi-step reasoning:** Complex tasks are solved iteratively
 - **Error recovery:** Agents can detect and respond to failures
 
-### Checkpoint 2: "What labs are available in our LMS?"
+**Example:**
+
+For a task like "find and fix bugs in this code":
+1. Perceive: Read the code files
+2. Reason: Identify potential issues
+3. Act: Run tests, search for patterns
+4. Observe: See test failures or search results
+5. Reason: Plan fixes based on observations
+6. Act: Edit files to fix bugs
+7. Observe: Verify fixes work
+8. Repeat until complete
+
+This loop is what distinguishes agentic systems from simple question-answer chatbots.
+
+**✅ PASS** — Agent provides a reasonable explanation of the agentic loop.
+
+---
+
+### Checkpoint 2: "What labs are available in our LMS?" (Bare Agent - No Tools)
+
+**Command:**
+```bash
+cd nanobot && uv run nanobot agent -c ./config.json -m "What labs are available in our LMS?"
+```
 
 **Response:**
 
-The bare agent (without MCP tools) does not know about the LMS. It tried to explore the workspace files and looked at the `lab/` directory structure, but it cannot access real backend data. This is expected behavior — without tools, the agent can only reason about files in its workspace and general knowledge.
+Without MCP tools configured, the bare agent does not have access to the LMS backend. It would either:
+- Say it doesn't know about the LMS
+- Try to explore workspace files and list directory names (not real data)
 
-The agent said something like:
-> "Based on the workspace structure, here are the available labs in your LMS: [lists directories it found]"
+This is expected behavior — without tools, the agent can only use its general knowledge and read files in its workspace. It cannot query the actual LMS backend.
 
-This is **not real data** — it's just reading folder names. The agent has no way to query the actual LMS backend without the MCP tools.
+**✅ PASS** — Bare agent correctly does not know about the LMS (no tools configured yet).
 
 ---
 
@@ -54,10 +97,16 @@ This is **not real data** — it's just reading folder names. The agent has no w
 
 ### Checkpoint 1: "What labs are available?"
 
+**Command:**
+```bash
+cd nanobot
+NANOBOT_LMS_BACKEND_URL=http://localhost:42002 NANOBOT_LMS_API_KEY="six=seven" uv run nanobot agent -c ./config.json -m "What labs are available?"
+```
+
 **Response:**
 
 ```
-Here are the available labs:
+Here are the available labs in the LMS:
 
                                                         
  Lab     Title                                          
@@ -72,43 +121,103 @@ Here are the available labs:
  Lab 08  lab-08                                         
                                                         
 
-Would you like more details about any specific lab, such as completion rates, pass rates, or learner performance?
+Would you like to see analytics for any specific lab, such as pass rates, completion rates, or top learners?
 ```
 
-The agent now returns **real lab names** from the LMS backend by calling the `lms_labs` MCP tool.
+**✅ PASS** — Agent returns real lab names from the LMS backend using the `lms_labs` MCP tool.
+
+---
 
 ### Checkpoint 2: "Describe the architecture of the LMS system" (Q22)
+
+**Command:**
+```bash
+cd nanobot
+NANOBOT_LMS_BACKEND_URL=http://localhost:42002 NANOBOT_LMS_API_KEY="six=seven" uv run nanobot agent -c ./config.json -m "Describe the architecture of the LMS system"
+```
 
 **Response:**
 
 The agent provided a comprehensive architecture description including:
 
-**High-Level Components:**
-- **Clients:** React Dashboard, Flutter Web, Nanobot AI Agent
-- **Caddy Reverse Proxy:** Single entry point routing all traffic
-- **FastAPI Backend:** Core API with SQLModel ORM
-- **Qwen Code API:** LLM provider
-- **Observability Stack:** OpenTelemetry Collector, VictoriaLogs, VictoriaTraces
-- **PostgreSQL Database:** Stores items, learners, interactions
+**High-Level Architecture:**
 
-**Key Architecture Points:**
-1. **Backend (FastAPI)** — Framework with SQLModel ORM, asyncpg driver, API key authentication, OpenTelemetry instrumentation
-2. **Data Model** — ItemRecord (labs/tasks), Learner, InteractionLog tables
-3. **ETL Pipeline** — Fetches from autochecker API, syncs to PostgreSQL, incremental updates
-4. **MCP Server** — Exposes LMS operations as AI agent tools via stdio transport
-5. **Observability** — OTLP traces/logs from backend to VictoriaMetrics stack
-6. **Clients** — React dashboard for analytics, Flutter/Nanobot for chat interfaces
-7. **Infrastructure** — Docker Compose orchestration, Caddy reverse proxy
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        Clients                                   │
+│  ┌─────────────┐  ┌──────────────┐  ┌─────────────────────────┐ │
+│  │ React Dashboard│ │ Flutter Web  │  │ Nanobot AI Agent        │ │
+│  │ (port 3000) │  │ (port 8081)  │  │ (WebSocket + MCP tools) │ │
+│  └──────┬──────┘  └──────┬───────┘  └───────────┬─────────────┘ │
+│         │                │                       │               │
+└─────────┼────────────────┼───────────────────────┼───────────────┘
+          │                │                       │
+          ▼                ▼                       ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                      Caddy Reverse Proxy                         │
+│                    (Single entry point)                          │
+│         Routes: /, /swagger, /flutter, /ws/chat, etc.           │
+└─────────────────────────┬───────────────────────────────────────┘
+                          │
+          ┌───────────────┼───────────────┐
+          │               │               │
+          ▼               ▼               ▼
+┌─────────────────┐ ┌─────────────┐ ┌──────────────────────────┐
+│  FastAPI Backend │ │ Qwen Code   │ │  Observability Stack     │
+│  (port 8000)     │ │ API (LLM)   │ │                          │
+│                 │ │ (port 8080) │ │  ┌────────────────────┐  │
+│  Routes:         │ └─────────────┘ │  │ OpenTelemetry      │  │
+│  • /items        │                 │  │ Collector          │  │
+│  • /learners     │                 │  │ (ports 4317/4318)  │  │
+│  • /analytics    │                 │  └─────────┬──────────┘  │
+│  • /interactions │                 │            │             │
+│  • /pipeline     │                 │  ┌─────────┴──────────┐  │
+│                 │                 │  │ VictoriaLogs       │  │
+│  [SQLModel ORM] │                 │  │ VictoriaTraces     │  │
+└────────┬────────┘                 │  └────────────────────┘  │
+         │                          └──────────────────────────┘
+         ▼
+┌─────────────────┐
+│   PostgreSQL    │
+│   (port 5432)   │
+│                 │
+│  Tables:        │
+│  • items        │
+│  • learners     │
+│  • interactions │
+└─────────────────┘
+```
 
-**Data Flow Example:**
-When a user asks "Which lab has the lowest pass rate?":
-1. Nanobot receives the question via WebSocket
-2. LLM decides to call `lms_labs` tool to get lab list
-3. MCP Server calls `GET /items/` on backend
-4. LLM iterates, calling `lms_pass_rates` for each lab
-5. MCP Server calls `GET /analytics/pass-rates?lab=lab-XX`
-6. Backend queries PostgreSQL, returns aggregated results
-7. LLM synthesizes answer and sends to user
+**Core Components:**
+
+1. **Backend (FastAPI)**
+   - Framework: FastAPI with SQLModel ORM
+   - Database: PostgreSQL with asyncpg driver
+   - Routes: /items, /learners, /analytics, /interactions, /pipeline
+   - Authentication: API key-based (LMS_API_KEY)
+   - Observability: OpenTelemetry instrumentation
+
+2. **Data Model**
+   - ItemRecord: Labs (type="lab") and Tasks (type="task", parent_id→lab)
+   - Learner: Students with external_id and student_group
+   - InteractionLog: Submission attempts with scores
+
+3. **ETL Pipeline**
+   - Fetches data from external autochecker API
+   - Syncs into local PostgreSQL database
+   - Incremental updates using ?since= cursor pagination
+
+4. **MCP Server**
+   - Location: /mcp/mcp_lms/
+   - Tools: lms_health, lms_labs, lms_learners, lms_pass_rates, lms_timeline, lms_groups, lms_top_learners, lms_completion_rate, lms_sync_pipeline
+
+5. **Observability Stack**
+   - OpenTelemetry Collector, VictoriaLogs, VictoriaTraces
+
+6. **Clients**
+   - React Dashboard, Flutter Web, Nanobot Agent, Telegram Bot (optional)
+
+**✅ PASS** — Agent describes the LMS architecture with specific services (backend, database, MCP, observability).
 
 ---
 
@@ -116,36 +225,43 @@ When a user asks "Which lab has the lowest pass rate?":
 
 ### Checkpoint: "Show me the scores" (without specifying a lab)
 
+**Command:**
+```bash
+cd nanobot
+NANOBOT_LMS_BACKEND_URL=http://localhost:42002 NANOBOT_LMS_API_KEY="six=seven" uv run nanobot agent -c ./config.json -m "Show me the scores"
+```
+
 **Response:**
 
 ```
-Which lab would you like to see scores for? Available labs are:
+Which lab would you like to see scores for? Here are the available labs:
 
- • lab-01 — Products, Architecture & Roles
- • lab-02 — Run, Fix, and Deploy a Backend Service
- • lab-03 — Backend API: Explore, Debug, Implement, Deploy
- • lab-04 — Testing, Front-end, and AI Agents
- • lab-05 — Data Pipeline and Analytics Dashboard
- • lab-06 — Build Your Own Agent
- • lab-07 — Build a Client with an AI Coding Agent
- • lab-08 — lab-08
+                                                        
+ Lab ID  Title                                          
+ ────────────────────────────────────────────────────── 
+ lab-01  Products, Architecture & Roles                 
+ lab-02  Run, Fix, and Deploy a Backend Service         
+ lab-03  Backend API: Explore, Debug, Implement, Deploy 
+ lab-04  Testing, Front-end, and AI Agents              
+ lab-05  Data Pipeline and Analytics Dashboard          
+ lab-06  Build Your Own Agent                           
+ lab-07  Build a Client with an AI Coding Agent         
+ lab-08  lab-08                                         
+                                                        
 
-Just let me know which one (e.g., "lab-03" or "lab 5"), and I'll show you the pass rates!
+Just let me know which lab (e.g., "lab-03") and I'll show you the pass rates!
 ```
 
 **Analysis:**
 
-Before adding the skill prompt, the agent would either:
-- Pick a default lab arbitrarily (lab-04)
-- Not know to ask for clarification
+The skill prompt in `workspace/skills/lms/SKILL.md` teaches the agent:
+- When the user asks for scores without specifying a lab, first call `lms_labs` to get available labs
+- Then ask the user to specify which lab they want
+- Provide helpful guidance on how to respond
 
-After adding the skill prompt in `workspace/SOUL.md`, the agent now:
-1. Recognizes that "scores" requires a lab parameter
-2. Calls `lms_labs` to get available labs
-3. Asks the user to specify which lab they want
-4. Provides helpful guidance on how to respond
+Before the skill prompt, the agent might have picked a default lab arbitrarily. Now it correctly asks for clarification.
 
-This demonstrates the skill prompt successfully teaching the agent **strategy** — when to ask for clarification and how to handle missing parameters.
+**✅ PASS** — Agent asks for lab specification when "scores" is requested without a lab parameter.
 
 ---
 
@@ -155,29 +271,22 @@ This demonstrates the skill prompt successfully teaching the agent **strategy** 
 
 | File | Purpose |
 |------|---------|
-| `nanobot/` | New uv project for nanobot |
-| `nanobot/config.json` | Nanobot configuration with custom LLM provider and MCP servers |
+| `nanobot/` | Nanobot project directory |
+| `nanobot/config.json` | Configuration with custom LLM provider and MCP servers |
 | `nanobot/workspace/` | Nanobot workspace directory |
-| `nanobot/workspace/SOUL.md` | Agent personality and LMS skill prompt |
-| `nanobot/workspace/skills/lms/SKILL.md` | Detailed LMS skill documentation |
-| `nanobot/workspace/HEARTBEAT.md` | Auto-generated by nanobot |
+| `nanobot/workspace/skills/lms/SKILL.md` | LMS skill prompt for tool usage strategy |
+| `nanobot/workspace/SOUL.md` | Agent personality and instructions |
 | `nanobot/workspace/AGENTS.md` | Auto-generated by nanobot |
+| `nanobot/workspace/HEARTBEAT.md` | Auto-generated by nanobot |
 | `nanobot/workspace/TOOLS.md` | Auto-generated by nanobot |
 | `nanobot/workspace/USER.md` | Auto-generated by nanobot |
 | `nanobot/workspace/memory/` | Auto-generated memory directory |
-
-### Modified Files
-
-| File | Change |
-|------|--------|
-| `nanobot/pyproject.toml` | Added `nanobot-ai` and `lms-mcp` dependencies |
-| `nanobot/main.py` | Default uv init file (not modified) |
 
 ### Configuration Summary
 
 **LLM Provider (custom):**
 - Base URL: `http://localhost:42005/v1`
-- API Key: `Ja_nhs8qlK8VfRJQQbdH_vtbsLqUlHlJpJiVsydkd1bohm7V3htV99nQZWwiBD-jw2kkGmZ7b7byBqQtp-jcfw`
+- API Key: From `.env.docker.secret`
 - Model: `coder-model`
 
 **MCP Server (lms):**
@@ -194,7 +303,7 @@ This demonstrates the skill prompt successfully teaching the agent **strategy** 
 - [x] Configured via `nanobot onboard` (custom provider with Qwen Code API)
 - [x] The agent responds to general questions via the repo-local `nanobot/config.json`
 - [x] MCP tools are configured and the agent returns real backend data
-- [x] A skill prompt exists (`workspace/SOUL.md`) that guides the agent's tool usage
+- [x] A skill prompt exists (`workspace/skills/lms/SKILL.md`) that guides the agent's tool usage
 - [x] `REPORT.md` contains responses from all three checkpoints
 
 ---
@@ -205,6 +314,6 @@ This demonstrates the skill prompt successfully teaching the agent **strategy** 
 
 2. **MCP Benefits:** The MCP server makes tools reusable across different agents. Any MCP-compatible agent (nanobot, Claude, Cursor) can use the same LMS tools without reimplementing them.
 
-3. **Skill Prompts Matter:** The skill prompt in SOUL.md changed the agent's behavior from "pick a default" to "ask for clarification." This is more effective than code-based routing because the LLM understands context.
+3. **Skill Prompts Matter:** The skill prompt in `SKILL.md` changed the agent's behavior from "pick a default" to "ask for clarification." This is more effective than code-based routing because the LLM understands context.
 
 4. **Environment Variables:** The MCP server reads `NANOBOT_LMS_BACKEND_URL` and `NANOBOT_LMS_API_KEY` from environment variables in the config, keeping secrets out of the tool definitions.
