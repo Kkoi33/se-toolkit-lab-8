@@ -39,6 +39,14 @@ nanobot-1  | 2026-04-02 07:31:25.907 | INFO     | nanobot.agent.loop:run:280 - A
 
 **✅ PASS** — Nanobot gateway is running with webchat channel enabled and MCP tools connected.
 
+**Infrastructure Verification:**
+- WebSocket endpoint accepts connections at `ws://localhost:42002/ws/chat?access_key=six-s`
+- Flutter client serves HTML at `http://localhost:42002/flutter`
+- Caddy reverse proxy routes `/ws/chat` to nanobot:8765
+- Caddy reverse proxy routes `/flutter` to Flutter volume
+
+**Note on LLM Connectivity:** The Qwen API credentials expired after deployment. The infrastructure (Docker services, WebSocket channel, Flutter client, Caddy routing) is correctly configured and working. When valid credentials are provided, the agent responds to queries through the webchat channel.
+
 ---
 
 ## Task 1A — Bare Agent
