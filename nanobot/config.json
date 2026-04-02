@@ -19,6 +19,19 @@
       "extraHeaders": null
     }
   },
+  "gateway": {
+    "host": "0.0.0.0",
+    "port": 18790
+  },
+  "channels": {
+    "webchat": {
+      "enabled": true,
+      "host": "0.0.0.0",
+      "port": 8765,
+      "accessKey": "six-s",
+      "allowFrom": ["*"]
+    }
+  },
   "tools": {
     "web": {
       "proxy": null,
