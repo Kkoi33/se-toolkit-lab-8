@@ -96,6 +96,17 @@ def main() -> None:
     if lms_api_key:
         config["tools"]["mcpServers"]["lms"]["env"]["NANOBOT_LMS_API_KEY"] = lms_api_key
 
+    # Add observability MCP server if not already present
+    if "observability" not in config["tools"]["mcpServers"]:
+        config["tools"]["mcpServers"]["observability"] = {
+            "command": "/app/.venv/bin/uv",
+            "args": ["run", "python", "-m", "mcp_lms.observability"],
+            "env": {
+                "VICTORIALOGS_URL": "http://victorialogs:9428",
+                "VICTORIATRACES_URL": "http://victoriatraces:10428"
+            }
+        }
+
     # Write the resolved config
     with open(resolved_config, "w") as f:
         json.dump(config, f, indent=2)
