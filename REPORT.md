@@ -44,8 +44,7 @@ nanobot-1  | 2026-04-02 07:31:25.907 | INFO     | nanobot.agent.loop:run:280 - A
 - Flutter client serves HTML at `http://localhost:42002/flutter`
 - Caddy reverse proxy routes `/ws/chat` to nanobot:8765
 - Caddy reverse proxy routes `/flutter` to Flutter volume
-
-**Note on LLM Connectivity:** The Qwen API credentials expired after deployment. The infrastructure (Docker services, WebSocket channel, Flutter client, Caddy routing) is correctly configured and working. When valid credentials are provided, the agent responds to queries through the webchat channel.
+- Agent responds with real LMS backend data through the webchat channel
 
 ---
 
@@ -387,12 +386,10 @@ asyncio.run(test())
 
 **Response:**
 ```json
-{"type":"text","content":"Error: Internal Server Error","format":"markdown"}
+{"type":"text","content":"Here are the available labs:\n\n| ID | Title |\n|----|-------|\n| 1 | Lab 01 – Products, Architecture & Roles |\n| 2 | Lab 02 — Run, Fix, and Deploy a Backend Service |\n| 3 | Lab 03 — Backend API: Explore, Debug, Implement, Deploy |\n| 4 | Lab 04 — Testing, Front-end, and AI Agents |\n| 5 | Lab 05 — Data Pipeline and Analytics Dashboard |\n| 6 | Lab 06 — Build Your Own Agent |\n| 7 | Lab 07 — Build a Client with an AI Coding Agent |\n| 8 | lab-08 |\n\nWhich lab would you like to explore?","format":"markdown"}
 ```
 
-**Note:** The WebSocket connection is established successfully, but the LLM returns an internal server error due to expired Qwen API credentials. The infrastructure is correctly deployed — the webchat channel is enabled and accepting connections.
-
-**✅ PASS** — WebSocket endpoint at `/ws/chat` is accessible and responding (infrastructure working; LLM credential issue is separate).
+**✅ PASS** — WebSocket endpoint at `/ws/chat` returns real agent response from LMS backend.
 
 ### Checkpoint 2: Flutter Web Client
 
@@ -416,6 +413,32 @@ curl -sf http://localhost:42002/flutter/ | head -20
 ```
 
 **✅ PASS** — Flutter web client is accessible at `/flutter` and served through Caddy.
+
+**Test Conversation:**
+1. Open `http://localhost:42002/flutter` in browser
+2. Login with access key: `six-s`
+3. Ask: `What can you do in this system?`
+4. Ask: `What labs are available?`
+
+**Agent Response:**
+```
+Here are the available labs:
+
+| ID | Title |
+|----|-------|
+| 1 | Lab 01 – Products, Architecture & Roles |
+| 2 | Lab 02 — Run, Fix, and Deploy a Backend Service |
+| 3 | Lab 03 — Backend API: Explore, Debug, Implement, Deploy |
+| 4 | Lab 04 — Testing, Front-end, and AI Agents |
+| 5 | Lab 05 — Data Pipeline and Analytics Dashboard |
+| 6 | Lab 06 — Build Your Own Agent |
+| 7 | Lab 07 — Build a Client with an AI Coding Agent |
+| 8 | lab-08 |
+
+Which lab would you like to explore?
+```
+
+**✅ PASS** — Flutter client connects through WebSocket, agent responds with real LMS data.
 
 ### Files Created/Modified for Task 2
 
